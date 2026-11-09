@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EstateHub - Premium Real Estate Agency Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#0B192C',
+                            900: '#1E3E62',
+                        },
+                        emerald: {
+                            500: '#10B981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-nav {
+            background: rgba(11, 25, 44, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-emerald-500 selection:text-white flex flex-col min-h-screen">
+
+    <!-- STICKY GLASSMORPHISM NAVBAR -->
+    <header class="sticky top-0 z-40 w-full glass-nav border-b border-slate-700/50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="resetFiltersAndScrollTop()">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/30 text-white font-bold text-xl">
+                        <i class="fa-solid font-bold fa-city"></i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-extrabold tracking-tight text-white">Estate<span class="text-emerald-400">Hub</span></span>
+                        <span class="block text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Real Estate & Living</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#hero" class="text-slate-200 hover:text-emerald-400 font-medium transition text-sm">Home</a>
+                    <a href="#listings" class="text-slate-200 hover:text-emerald-400 font-medium transition text-sm">Listings</a>
+                    <a href="#calculator" class="text-slate-200 hover:text-emerald-400 font-medium transition text-sm">Mortgage Calc</a>
+                    <a href="#about" class="text-slate-200 hover:text-emerald-400 font-medium transition text-sm">About Us</a>
+                    <a href="#contact" class="text-slate-200 hover:text-emerald-400 font-medium transition text-sm">Contact</a>
+                </nav>
+
+                <!-- Auth / User Actions -->
+                <div class="hidden sm:flex items-center gap-4">
+                    <!-- Saved Favorites Button -->
+                    <button onclick="toggleFavoritesDrawer()" class="relative p-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                        <i class="fa-regular fa-heart text-lg"></i>
+                        <span id="favCountBadge" class="absolute -top-1 -right-1 bg-emerald-500 text-white text-[11px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-slate-900 hidden">0</span>
+                    </button>
+
+                    <!-- Unauthenticated View -->
+                    <div id="unauthNav" class="flex items-center gap-3">
+                        <button onclick="openAuthModal('login')" class="text-slate-200 hover:text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800/80 rounded-xl transition">
+                            Log In
+                        </button>
+                        <button onclick="openAuthModal('signup')" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-emerald-500/20 transition transform active:scale-95">
+                            Sign Up
+                        </button>
+                    </div>
+
+                    <!-- Authenticated View -->
+                    <div id="authNav" class="hidden flex items-center gap-3">
+                        <button onclick="openPostModal()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-md transition flex items-center gap-2">
+                            <i class="fa-solid fa-plus text-xs"></i> Post Property
+                        </button>
+                        <div class="relative group">
+                            <button class="flex items-center gap-2 p-1 bg-slate-800 rounded-full border border-slate-700 hover:border-emerald-500 transition">
+                                <img id="userAvatarNav" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150" alt="User Avatar" class="w-8 h-8 rounded-full object-cover">
+                                <span id="userNameNav" class="text-xs font-semibold text-slate-200 max-w-[90px] truncate pr-2">User</span>
+                            </button>
+                            <!-- Dropdown -->
+                            <div class="absolute right-0 mt-2 w-48 bg-slate-900 text-slate-200 rounded-2xl shadow-xl border border-slate-700 py-2 hidden group-hover:block transition">
+                                <div class="px-4 py-2 border-b border-slate-800">
+                                    <p class="text-xs text-slate-400">Signed in as</p>
+                                    <p id="userEmailNav" class="text-xs font-semibold truncate text-white">user@example.com</p>
+                                </div>
+                                <a href="#saved" onclick="toggleFavoritesDrawer()" class="block px-4 py-2 text-xs hover:bg-slate-800 hover:text-emerald-400 transition"><i class="fa-regular fa-bookmark mr-2"></i> Saved Properties</a>
+                                <button onclick="logout()" class="w-full text-left px-4 py-2 text-xs text-rose-400 hover:bg-slate-800 transition"><i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Sign Out</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="md:hidden text-slate-300 hover:text-white p-2 text-xl focus:outline-none">
+                    <i class="fa-solid fa-bars" id="mobileMenuIcon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Nav Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-slate-900 border-b border-slate-800 px-4 pt-2 pb-6 space-y-3">
+            <a href="#hero" onclick="toggleMobileMenu()" class="block text-slate-200 hover:text-emerald-400 font-medium py-2">Home</a>
+            <a href="#listings" onclick="toggleMobileMenu()" class="block text-slate-200 hover:text-emerald-400 font-medium py-2">Listings</a>
+            <a href="#calculator" onclick="toggleMobileMenu()" class="block text-slate-200 hover:text-emerald-400 font-medium py-2">Mortgage Calc</a>
+            <a href="#about" onclick="toggleMobileMenu()" class="block text-slate-200 hover:text-emerald-400 font-medium py-2">About Us</a>
+            <a href="#contact" onclick="toggleMobileMenu()" class="block text-slate-200 hover:text-emerald-400 font-medium py-2">Contact</a>
+            <div class="pt-4 border-t border-slate-800 flex flex-col gap-3">
+                <button onclick="toggleFavoritesDrawer(); toggleMobileMenu();" class="w-full py-2.5 bg-slate-800 text-slate-200 rounded-xl font-semibold text-sm flex items-center justify-center gap-2">
+                    <i class="fa-regular fa-heart"></i> Saved Favorites
+                </button>
+                <div id="unauthMobileNav" class="flex flex-col gap-2">
+                    <button onclick="openAuthModal('login'); toggleMobileMenu();" class="w-full py-2.5 text-center text-slate-200 border border-slate-700 rounded-xl font-semibold text-sm">Log In</button>
+                    <button onclick="openAuthModal('signup'); toggleMobileMenu();" class="w-full py-2.5 bg-emerald-500 text-white rounded-xl font-semibold text-sm">Sign Up</button>
+                </div>
+                <div id="authMobileNav" class="hidden flex flex-col gap-2">
+                    <button onclick="openPostModal(); toggleMobileMenu();" class="w-full py-2.5 bg-emerald-500 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus text-xs"></i> Post Property
+                    </button>
+                    <button onclick="logout(); toggleMobileMenu();" class="w-full py-2.5 bg-rose-500/20 text-rose-300 rounded-xl font-semibold text-sm">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION WITH MULTI-FIELD ADVANCED SEARCH -->
+    <section id="hero" class="relative bg-navy-800 text-white py-20 lg:py-28 overflow-hidden">
+        <!-- Background Overlay Image -->
+        <div class="absolute inset-0 z-0 opacity-20 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=2000');"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-navy-800/80 via-navy-800/95 to-slate-50 z-0"></div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <span class="inline-block px-4 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full text-xs font-semibold uppercase tracking-widest mb-4">
+                The Premier Real Estate Destination
+            </span>
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 max-w-4xl mx-auto leading-tight">
+                Find Your Dream Home With Confidence & Ease
+            </h1>
+            <p class="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto mb-10 font-normal">
+                Explore luxury villas, modern apartments, and prime commercial spaces across top destinations. Buy, rent, or list properties seamlessly.
+            </p>
+
+            <!-- ADVANCED SEARCH FILTER BOX -->
+            <div class="max-w-5xl mx-auto bg-white/95 backdrop-blur-md text-slate-800 rounded-3xl p-5 sm:p-7 shadow-2xl border border-white/40">
+                <!-- Tabs: Buy / Rent / All -->
+                <div class="flex items-center gap-2 mb-6 border-b border-slate-200 pb-4">
+                    <button id="purposeAll" onclick="setPurposeFilter('all')" class="px-5 py-2 rounded-xl font-semibold text-sm transition bg-emerald-500 text-white shadow-md">All Properties</button>
+                    <button id="purposeSale" onclick="setPurposeFilter('Sale')" class="px-5 py-2 rounded-xl font-semibold text-sm transition text-slate-600 hover:bg-slate-100">For Sale</button>
+                    <button id="purposeRent" onclick="setPurposeFilter('Rent')" class="px-5 py-2 rounded-xl font-semibold text-sm transition text-slate-600 hover:bg-slate-100">For Rent</button>
+                </div>
+
+                <!-- Search Input Controls -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
+                    <!-- Location Search -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs font-bold uppercase text-slate-500 tracking-wider">Location</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-location-dot absolute left-3.5 top-3.5 text-slate-400"></i>
+                            <input type="text" id="filterLocation" placeholder="e.g. Dubai, New York, Karachi" oninput="applyFilters()" class="w-full pl-10 pr-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                    </div>
+
+                    <!-- Property Type -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs font-bold uppercase text-slate-500 tracking-wider">Property Type</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-house absolute left-3.5 top-3.5 text-slate-400"></i>
+                            <select id="filterType" onchange="applyFilters()" class="w-full pl-10 pr-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="all">All Types</option>
+                                <option value="House">House / Townhouse</option>
+                                <option value="Apartment">Apartment / Flat</option>
+                                <option value="Villa">Luxury Villa</option>
+                                <option value="Commercial">Commercial / Office</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Bedrooms Filter -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs font-bold uppercase text-slate-500 tracking-wider">Min Bedrooms</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-bed absolute left-3.5 top-3.5 text-slate-400"></i>
+                            <select id="filterBeds" onchange="applyFilters()" class="w-full pl-10 pr-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="any">Any Beds</option>
+                                <option value="1">1+ Bedrooms</option>
+                                <option value="2">2+ Bedrooms</option>
+                                <option value="3">3+ Bedrooms</option>
+                                <option value="4">4+ Bedrooms</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Price Slider -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex justify-between items-center">
+                            <label class="text-xs font-bold uppercase text-slate-500 tracking-wider">Max Price</label>
+                            <span id="priceDisplay" class="text-xs font-bold text-emerald-600">$5,000,000</span>
+                        </div>
+                        <input type="range" id="filterPrice" min="1000" max="5000000" step="10000" value="5000000" oninput="updatePriceLabel(); applyFilters();" class="w-full accent-emerald-500 cursor-pointer mt-3">
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100 pt-4">
+                    <span id="resultsCount" class="text-xs font-semibold text-slate-500">Showing all properties</span>
+                    <button onclick="resetFilters()" class="text-xs font-bold text-rose-500 hover:text-rose-600 transition flex items-center gap-1">
+                        <i class="fa-solid fa-rotate-left"></i> Reset Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LISTINGS SECTION -->
+    <section id="listings" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-grow">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+            <div>
+                <h2 class="text-3xl font-extrabold text-navy-800 tracking-tight">Featured Property Listings</h2>
+                <p class="text-slate-500 text-sm mt-1">Discover verified real estate opportunities curated by top agents.</p>
+            </div>
+            <!-- Sort dropdown -->
+            <div class="mt-4 md:mt-0 flex items-center gap-2">
+                <span class="text-xs font-bold uppercase text-slate-400">Sort By:</span>
+                <select id="sortBy" onchange="applyFilters()" class="bg-white border border-slate-200 text-xs font-semibold rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="featured">Featured First</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="newest">Newest First</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Property Grid Feed -->
+        <div id="propertyGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Dynamic Property Cards Injected Here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16 bg-white rounded-3xl border border-slate-200">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 text-2xl mb-4">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700">No properties found</h3>
+            <p class="text-slate-400 text-sm mt-1 max-w-md mx-auto">Try adjusting your location, price range, or category filters to find matching properties.</p>
+            <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-semibold hover:bg-emerald-600 transition">Reset All Filters</button>
+        </div>
+    </section>
+
+    <!-- MORTGAGE CALCULATOR SECTION -->
+    <section id="calculator" class="bg-slate-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <div class="lg:col-span-5">
+                    <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-bold uppercase tracking-wider">Financial Planning</span>
+                    <h2 class="text-3xl font-extrabold mt-3 mb-4 leading-tight">Mortgage & Payment Estimator</h2>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                        Plan your home purchasing strategy with real-time interest rate calculations. Customize down payment and loan term to see estimated monthly installments.
+                    </p>
+                    <div class="p-4 bg-slate-800/60 rounded-2xl border border-slate-700/80">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-slate-400">Estimated Monthly Installment</span>
+                            <span class="text-xs font-semibold text-emerald-400">Fixed Rate</span>
+                        </div>
+                        <div id="calcResult" class="text-3xl font-black text-emerald-400">$2,411 <span class="text-xs font-normal text-slate-400">/ mo</span></div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-700">
+                    <div class="space-y-6">
+                        <!-- Home Price Slider -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-xs font-bold uppercase text-slate-300">Home Price ($)</label>
+                                <span id="calcPriceVal" class="text-sm font-bold text-emerald-400">$450,000</span>
+                            </div>
+                            <input type="range" id="calcPrice" min="50000" max="2000000" step="10000" value="450000" oninput="calculateMortgage()" class="w-full accent-emerald-500 cursor-pointer">
+                        </div>
+
+                        <!-- Down Payment Slider -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-xs font-bold uppercase text-slate-300">Down Payment (20%)</label>
+                                <span id="calcDownVal" class="text-sm font-bold text-emerald-400">$90,000</span>
+                            </div>
+                            <input type="range" id="calcDown" min="5" max="50" step="1" value="20" oninput="calculateMortgage()" class="w-full accent-emerald-500 cursor-pointer">
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Interest Rate -->
+                            <div>
+                                <label class="text-xs font-bold uppercase text-slate-300 mb-2 block">Interest Rate (%)</label>
+                                <input type="number" id="calcInterest" value="5.5" step="0.1" oninput="calculateMortgage()" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+
+                            <!-- Loan Term -->
+                            <div>
+                                <label class="text-xs font-bold uppercase text-slate-300 mb-2 block">Loan Duration</label>
+                                <select id="calcTerm" onchange="calculateMortgage()" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="15">15 Years Fixed</option>
+                                    <option value="30" selected>30 Years Fixed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT / STATS SECTION -->
+    <section id="about" class="py-16 bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div class="text-3xl font-extrabold text-navy-800">$2.4B+</div>
+                    <div class="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Property Volume Sold</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div class="text-3xl font-extrabold text-navy-800">12,500+</div>
+                    <div class="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Happy Homeowners</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div class="text-3xl font-extrabold text-navy-800">98.4%</div>
+                    <div class="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Satisfaction Rate</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div class="text-3xl font-extrabold text-navy-800">450+</div>
+                    <div class="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Certified Agents</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="contact" class="bg-navy-800 text-slate-400 py-12 border-t border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div>
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-bold">
+                        <i class="fa-solid fa-city text-sm"></i>
+                    </div>
+                    <span class="text-xl font-bold text-white">Estate<span class="text-emerald-400">Hub</span></span>
+                </div>
+                <p class="text-xs leading-relaxed text-slate-400">Connecting home buyers, renters, and top tier property sellers across prime worldwide destinations.</p>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase text-white tracking-wider mb-3">Quick Links</h4>
+                <ul class="space-y-2 text-xs">
+                    <li><a href="#hero" class="hover:text-emerald-400 transition">Featured Locations</a></li>
+                    <li><a href="#listings" class="hover:text-emerald-400 transition">Luxury Villas</a></li>
+                    <li><a href="#calculator" class="hover:text-emerald-400 transition">Mortgage Tools</a></li>
+                    <li><a href="#about" class="hover:text-emerald-400 transition">Agent Network</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase text-white tracking-wider mb-3">Legal & Support</h4>
+                <ul class="space-y-2 text-xs">
+                    <li><a href="#" class="hover:text-emerald-400 transition">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-emerald-400 transition">Terms of Service</a></li>
+                    <li><a href="#" class="hover:text-emerald-400 transition">Licensing & Compliance</a></li>
+                    <li><a href="#" class="hover:text-emerald-400 transition">Help Center</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold uppercase text-white tracking-wider mb-3">Contact Us</h4>
+                <p class="text-xs mb-2"><i class="fa-solid fa-envelope mr-2 text-emerald-400"></i> info@estatehub.com</p>
+                <p class="text-xs mb-4"><i class="fa-solid fa-phone mr-2 text-emerald-400"></i> +1 (800) 555-ESTATE</p>
+                <div class="flex space-x-3">
+                    <a href="#" class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-300 hover:bg-emerald-500 hover:text-white transition"><i class="fa-brands fa-facebook-f text-xs"></i></a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-300 hover:bg-emerald-500 hover:text-white transition"><i class="fa-brands fa-twitter text-xs"></i></a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-300 hover:bg-emerald-500 hover:text-white transition"><i class="fa-brands fa-instagram text-xs"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-700/60 pt-6 text-center text-xs">
+            &copy; 2026 EstateHub Real Estate Co. All Rights Reserved. Designed with clean UI/UX.
+        </div>
+    </footer>
+
+    <!-- MODAL 1: PROPERTY DETAILS MODAL -->
+    <div id="propertyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm hidden overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative custom-scrollbar">
+            <!-- Close Button -->
+            <button onclick="closeModal('propertyModal')" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-slate-900/70 text-white flex items-center justify-center hover:bg-slate-900 transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Image Header Carousel -->
+            <div class="relative h-72 sm:h-96 w-full bg-slate-900">
+                <img id="modalImg" src="" alt="Property" class="w-full h-full object-cover">
+                <div id="modalBadge" class="absolute top-4 left-4 px-3 py-1 bg-emerald-500 text-white font-bold text-xs rounded-full uppercase">For Sale</div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h2 id="modalTitle" class="text-2xl sm:text-3xl font-extrabold text-navy-800">Property Title</h2>
+                        <p id="modalLocation" class="text-slate-500 text-sm mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-location-dot text-emerald-500"></i> Location details
+                        </p>
+                    </div>
+                    <div>
+                        <span id="modalPrice" class="text-3xl font-black text-emerald-600">$0</span>
+                    </div>
+                </div>
+
+                <!-- Specs Grid -->
+                <div class="grid grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl mb-6 text-center border border-slate-100">
+                    <div>
+                        <span class="block text-xs uppercase text-slate-400 font-bold">Bedrooms</span>
+                        <span id="modalBeds" class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-bed text-emerald-500 mr-1"></i> 0</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs uppercase text-slate-400 font-bold">Bathrooms</span>
+                        <span id="modalBaths" class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-bath text-emerald-500 mr-1"></i> 0</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs uppercase text-slate-400 font-bold">Square Feet</span>
+                        <span id="modalArea" class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-ruler-combined text-emerald-500 mr-1"></i> 0 sqft</span>
+                    </div>
+                </div>
+
+                <h4 class="font-bold text-slate-800 mb-2">Description & Features</h4>
+                <p id="modalDesc" class="text-slate-600 text-sm leading-relaxed mb-6">
+                    Full description of the real estate listing...
+                </p>
+
+                <!-- Agent Contact & Inquiry Form -->
+                <div class="bg-slate-900 text-white p-6 rounded-2xl flex flex-col md:flex-row gap-6 items-center">
+                    <div class="flex items-center gap-4 w-full md:w-1/2">
+                        <img id="agentAvatar" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=150" alt="Agent" class="w-14 h-14 rounded-full object-cover border-2 border-emerald-400">
+                        <div>
+                            <p class="text-xs text-slate-400 font-semibold">Listing Agent</p>
+                            <h5 id="agentName" class="font-bold text-base text-white">Alexander Wright</h5>
+                            <p class="text-xs text-emerald-400"><i class="fa-solid fa-shield-halved"></i> Verified Premier Agent</p>
+                        </div>
+                    </div>
+                    <form onsubmit="sendInquiry(event)" class="w-full md:w-1/2 flex flex-col gap-2">
+                        <input type="text" placeholder="Your Name" required class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                        <input type="email" placeholder="Your Email or Phone" required class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                        <button type="submit" class="w-full py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs transition">
+                            Send Direct Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: AUTHENTICATION MODAL (WITH GOOGLE OAUTH SIMULATION) -->
+    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative">
+            <button onclick="closeModal('authModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-slate-200 mb-6">
+                <button id="authTabLogin" onclick="switchAuthTab('login')" class="w-1/2 py-2 font-bold text-sm text-emerald-600 border-b-2 border-emerald-600 transition">Log In</button>
+                <button id="authTabSignup" onclick="switchAuthTab('signup')" class="w-1/2 py-2 font-bold text-sm text-slate-400 border-b-2 border-transparent hover:text-slate-600 transition">Sign Up</button>
+            </div>
+
+            <!-- SIMULATED GOOGLE OAUTH BUTTON -->
+            <button onclick="loginWithGoogle()" class="w-full py-3 border border-slate-300 rounded-2xl font-semibold text-sm text-slate-700 flex items-center justify-center gap-3 hover:bg-slate-50 transition mb-4 shadow-sm">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                Continue with Google
+            </button>
+
+            <div class="flex items-center my-4">
+                <div class="flex-grow border-t border-slate-200"></div>
+                <span class="px-3 text-xs uppercase text-slate-400 font-semibold">Or Email</span>
+                <div class="flex-grow border-t border-slate-200"></div>
+            </div>
+
+            <!-- Email / Password Form -->
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div id="nameField" class="hidden">
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Full Name</label>
+                    <input type="text" id="authName" placeholder="John Doe" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Email Address</label>
+                    <input type="email" id="authEmail" placeholder="name@example.com" required class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Password</label>
+                    <input type="password" id="authPassword" placeholder="••••••••" required class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <button type="submit" id="authBtn" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl text-sm shadow-md transition">
+                    Log In
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: POST PROPERTY DRAWER/MODAL -->
+    <div id="postModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm hidden overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative my-8">
+            <button onclick="closeModal('postModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-2xl font-extrabold text-navy-800 mb-1">Post New Listing</h3>
+            <p class="text-xs text-slate-500 mb-6">List your property on EstateHub for thousands of potential buyers.</p>
+
+            <form onsubmit="handlePostProperty(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Property Title</label>
+                    <input type="text" id="postTitle" placeholder="e.g. Modern Minimalist Villa" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Listing Purpose</label>
+                        <select id="postPurpose" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500">
+                            <option value="Sale">For Sale</option>
+                            <option value="Rent">For Rent</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Property Type</label>
+                        <select id="postType" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500">
+                            <option value="House">House</option>
+                            <option value="Apartment">Apartment</option>
+                            <option value="Villa">Luxury Villa</option>
+                            <option value="Commercial">Commercial</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Price ($ USD or PKR equivalent)</label>
+                        <input type="number" id="postPrice" placeholder="500000" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Location City / Area</label>
+                        <input type="text" id="postLocation" placeholder="e.g. Miami, FL" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Bedrooms</label>
+                        <input type="number" id="postBeds" value="3" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Bathrooms</label>
+                        <input type="number" id="postBaths" value="2" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Area (sq ft)</label>
+                        <input type="number" id="postArea" value="2200" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Image URL (Unsplash or direct image link)</label>
+                    <input type="url" id="postImg" placeholder="https://images.unsplash.com/photo-..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Description</label>
+                    <textarea id="postDesc" rows="3" placeholder="Highlight key features like pool, backyard, luxury finishes..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl text-sm shadow-md transition">
+                    Publish Property Listing
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- DRAWER: FAVORITES / SAVED PROPERTIES -->
+    <div id="favDrawer" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden">
+        <div class="absolute right-0 top-0 bottom-0 max-w-md w-full bg-white shadow-2xl p-6 overflow-y-auto flex flex-col justify-between custom-scrollbar">
+            <div>
+                <div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-4">
+                    <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-heart text-rose-500"></i> Saved Favorites
+                    </h3>
+                    <button onclick="toggleFavoritesDrawer()" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+                <div id="favList" class="space-y-4">
+                    <!-- Favorite Cards Inject Here -->
+                </div>
+            </div>
+            <div class="border-t border-slate-200 pt-4 mt-6">
+                <button onclick="toggleFavoritesDrawer()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">
+                    Close Saved List
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 hidden bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl border border-slate-700 flex items-center gap-3 transition">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMsg" class="text-xs font-semibold">Action completed successfully.</span>
+    </div>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        // INITIAL MOCK PROPERTIES DATA
+        const initialProperties = [
+            {
+                id: 1,
+                title: "The Grand Waterfront Villa",
+                purpose: "Sale",
+                type: "Villa",
+                price: 1850000,
+                location: "Miami, Florida",
+                beds: 5,
+                baths: 4,
+                area: 4500,
+                img: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&q=80&w=1000",
+                desc: "Stunning waterfront property with panoramic bay views, private infinity pool, boat dock, and high-end smart home automation system.",
+                featured: true,
+                agent: { name: "Sarah Jenkins", phone: "+1 305-555-0192" }
+            },
+            {
+                id: 2,
+                title: "Skyline Modern Penthouse",
+                purpose: "Rent",
+                type: "Apartment",
+                price: 4500,
+                location: "New York, NY",
+                beds: 2,
+                baths: 2,
+                area: 1650,
+                img: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=1000",
+                desc: "Luxury floor-to-ceiling glass penthouse offering floor views of Central Park, private concierge, gym, and rooftop deck.",
+                featured: true,
+                agent: { name: "David Miller", phone: "+1 212-555-0144" }
+            },
+            {
+                id: 3,
+                title: "Contemporary Suburban Haven",
+                purpose: "Sale",
+                type: "House",
+                price: 640000,
+                location: "Austin, Texas",
+                beds: 4,
+                baths: 3,
+                area: 2800,
+                img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1000",
+                desc: "Eco-friendly family home featuring solar panels, spacious backyard, open-concept gourmet kitchen, and top school district location.",
+                featured: false,
+                agent: { name: "Elena Rostova", phone: "+1 512-555-0177" }
+            },
+            {
+                id: 4,
+                title: "Commercial Retail & Office Suite",
+                purpose: "Rent",
+                type: "Commercial",
+                price: 7800,
+                location: "Dubai, UAE",
+                beds: 0,
+                baths: 2,
+                area: 3200,
+                img: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000",
+                desc: "Prime commercial space in Downtown Business Bay. High foot traffic, marble reception area, and dedicated underground parking spots.",
+                featured: false,
+                agent: { name: "Tariq Mansoor", phone: "+971 4-555-0122" }
+            },
+            {
+                id: 5,
+                title: "Hillside Mediterranean Estate",
+                purpose: "Sale",
+                type: "Villa",
+                price: 2400000,
+                location: "Los Angeles, CA",
+                beds: 6,
+                baths: 6,
+                area: 5800,
+                img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=1000",
+                desc: "Secluded Bel-Air hillside estate with wine cellar, private movie theater, manicured gardens, and tennis court.",
+                featured: true,
+                agent: { name: "Sarah Jenkins", phone: "+1 310-555-0199" }
+            },
+            {
+                id: 6,
+                title: "Charming Urban Loft",
+                purpose: "Rent",
+                type: "Apartment",
+                price: 2200,
+                location: "Chicago, IL",
+                beds: 1,
+                baths: 1,
+                area: 950,
+                img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=1000",
+                desc: "Exposed brick walls, industrial beam architecture, modern steel fixtures, and walkable distance to financial hub.",
+                featured: false,
+                agent: { name: "David Miller", phone: "+1 312-555-0188" }
+            }
+        ];
+
+        // STATE MANAGEMENT
+        let properties = JSON.parse(localStorage.getItem('estatehub_props')) || initialProperties;
+        let favorites = JSON.parse(localStorage.getItem('estatehub_favs')) || [];
+        let currentUser = JSON.parse(localStorage.getItem('estatehub_user')) || null;
+
+        let activePurposeFilter = 'all';
+        let currentAuthMode = 'login';
+
+        // ON INITIAL LOAD
+        window.onload = function() {
+            updateAuthUI();
+            applyFilters();
+            updateFavoritesUI();
+            calculateMortgage();
+        };
+
+        // RENDER PROPERTY FEED
+        function renderProperties(list) {
+            const grid = document.getElementById('propertyGrid');
+            const empty = document.getElementById('emptyState');
+            const count = document.getElementById('resultsCount');
+
+            grid.innerHTML = '';
+            count.innerText = `Showing ${list.length} properties`;
+
+            if (list.length === 0) {
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+
+            list.forEach(prop => {
+                const isFav = favorites.includes(prop.id);
+                const priceFormatted = prop.purpose === 'Rent' 
+                    ? `$${prop.price.toLocaleString()} / mo`
+                    : `$${prop.price.toLocaleString()}`;
+
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group";
+                card.innerHTML = `
+                    <div class="relative h-56 overflow-hidden">
+                        <img src="${prop.img}" alt="${prop.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute top-3 left-3 flex gap-2">
+                            <span class="px-3 py-1 bg-${prop.purpose === 'Sale' ? 'emerald-500' : 'blue-600'} text-white font-extrabold text-[11px] rounded-full uppercase tracking-wider shadow">
+                                For ${prop.purpose}
+                            </span>
+                            ${prop.featured ? `<span class="px-3 py-1 bg-amber-500 text-white font-extrabold text-[11px] rounded-full uppercase tracking-wider shadow">Featured</span>` : ''}
+                        </div>
+                        <button onclick="toggleFavorite(${prop.id}, event)" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/80 hover:bg-white backdrop-blur-sm flex items-center justify-center text-slate-700 hover:text-rose-500 transition shadow">
+                            <i class="${isFav ? 'fa-solid fa-heart text-rose-500' : 'fa-regular fa-heart'}"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-6 flex flex-col flex-grow justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-extrabold text-emerald-600 uppercase tracking-wider">${prop.type}</span>
+                                <span class="text-xl font-black text-navy-800">${priceFormatted}</span>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-slate-800 line-clamp-1 hover:text-emerald-600 transition cursor-pointer" onclick="openPropertyModal(${prop.id})">${prop.title}</h3>
+                            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1 mb-4">
+                                <i class="fa-solid fa-location-dot text-slate-400"></i> ${prop.location}
+                            </p>
+                        </div>
+
+                        <div>
+                            <div class="grid grid-cols-3 gap-2 border-t border-b border-slate-100 py-3 mb-4 text-center text-xs font-semibold text-slate-600">
+                                <div><i class="fa-solid fa-bed text-slate-400 mr-1"></i> ${prop.beds} Beds</div>
+                                <div><i class="fa-solid fa-bath text-slate-400 mr-1"></i> ${prop.baths} Baths</div>
+                                <div><i class="fa-solid fa-ruler-combined text-slate-400 mr-1"></i> ${prop.area} sqft</div>
+                            </div>
+                            <button onclick="openPropertyModal(${prop.id})" class="w-full py-2.5 bg-slate-900 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs transition">
+                                View Details & Contact
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // FILTER & SEARCH LOGIC
+        function applyFilters() {
+            const locQuery = document.getElementById('filterLocation').value.toLowerCase();
+            const typeVal = document.getElementById('filterType').value;
+            const bedVal = document.getElementById('filterBeds').value;
+            const maxPrice = parseFloat(document.getElementById('filterPrice').value);
+            const sortBy = document.getElementById('sortBy').value;
+
+            let filtered = properties.filter(p => {
+                const matchesLoc = p.location.toLowerCase().includes(locQuery) || p.title.toLowerCase().includes(locQuery);
+                const matchesType = typeVal === 'all' || p.type === typeVal;
+                const matchesPurpose = activePurposeFilter === 'all' || p.purpose === activePurposeFilter;
+                const matchesBeds = bedVal === 'any' || p.beds >= parseInt(bedVal);
+                const matchesPrice = p.price <= maxPrice;
+
+                return matchesLoc && matchesType && matchesPurpose && matchesBeds && matchesPrice;
+            });
+
+            // Sorting
+            if (sortBy === 'price-asc') {
+                filtered.sort((a, b) => a.price - b.price);
+            } else if (sortBy === 'price-desc') {
+                filtered.sort((a, b) => b.price - a.price);
+            } else if (sortBy === 'featured') {
+                filtered.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+            }
+
+            renderProperties(filtered);
+        }
+
+        function setPurposeFilter(purpose) {
+            activePurposeFilter = purpose;
+            ['All', 'Sale', 'Rent'].forEach(p => {
+                const btn = document.getElementById(`purpose${p}`);
+                if (p.toLowerCase() === purpose.toLowerCase()) {
+                    btn.className = "px-5 py-2 rounded-xl font-semibold text-sm transition bg-emerald-500 text-white shadow-md";
+                } else {
+                    btn.className = "px-5 py-2 rounded-xl font-semibold text-sm transition text-slate-600 hover:bg-slate-100";
+                }
+            });
+            applyFilters();
+        }
+
+        function updatePriceLabel() {
+            const val = document.getElementById('filterPrice').value;
+            document.getElementById('priceDisplay').innerText = `$${parseInt(val).toLocaleString()}`;
+        }
+
+        function resetFilters() {
+            document.getElementById('filterLocation').value = '';
+            document.getElementById('filterType').value = 'all';
+            document.getElementById('filterBeds').value = 'any';
+            document.getElementById('filterPrice').value = 5000000;
+            document.getElementById('sortBy').value = 'featured';
+            updatePriceLabel();
+            setPurposeFilter('all');
+        }
+
+        function resetFiltersAndScrollTop() {
+            resetFilters();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // PROPERTY DETAILS MODAL
+        function openPropertyModal(id) {
+            const prop = properties.find(p => p.id === id);
+            if (!prop) return;
+
+            document.getElementById('modalImg').src = prop.img;
+            document.getElementById('modalBadge').innerText = `For ${prop.purpose}`;
+            document.getElementById('modalTitle').innerText = prop.title;
+            document.getElementById('modalLocation').innerHTML = `<i class="fa-solid fa-location-dot text-emerald-500"></i> ${prop.location}`;
+            document.getElementById('modalPrice').innerText = prop.purpose === 'Rent' ? `$${prop.price.toLocaleString()} / mo` : `$${prop.price.toLocaleString()}`;
+            document.getElementById('modalBeds').innerText = prop.beds;
+            document.getElementById('modalBaths').innerText = prop.baths;
+            document.getElementById('modalArea').innerText = `${prop.area} sqft`;
+            document.getElementById('modalDesc').innerText = prop.desc;
+
+            document.getElementById('propertyModal').classList.remove('hidden');
+        }
+
+        // FAVORITES SYSTEM
+        function toggleFavorite(id, e) {
+            if (e) e.stopPropagation();
+            const index = favorites.indexOf(id);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                showToast("Property removed from favorites.");
+            } else {
+                favorites.push(id);
+                showToast("Property saved to favorites!");
+            }
+            localStorage.setItem('estatehub_favs', JSON.stringify(favorites));
+            updateFavoritesUI();
+            applyFilters();
+        }
+
+        function updateFavoritesUI() {
+            const badge = document.getElementById('favCountBadge');
+            const list = document.getElementById('favList');
+
+            if (favorites.length > 0) {
+                badge.innerText = favorites.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            list.innerHTML = '';
+            if (favorites.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No saved properties yet.</p>`;
+                return;
+            }
+
+            favorites.forEach(id => {
+                const prop = properties.find(p => p.id === id);
+                if (prop) {
+                    const item = document.createElement('div');
+                    item.className = "flex gap-3 bg-slate-50 p-2.5 rounded-2xl border border-slate-200 items-center";
+                    item.innerHTML = `
+                        <img src="${prop.img}" class="w-16 h-16 rounded-xl object-cover">
+                        <div class="flex-grow">
+                            <h4 class="text-xs font-bold text-slate-800 line-clamp-1">${prop.title}</h4>
+                            <p class="text-[11px] font-bold text-emerald-600">$${prop.price.toLocaleString()}</p>
+                            <p class="text-[10px] text-slate-400">${prop.location}</p>
+                        </div>
+                        <button onclick="toggleFavorite(${prop.id})" class="text-slate-400 hover:text-rose-500 p-2">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    `;
+                    list.appendChild(item);
+                }
+            });
+        }
+
+        function toggleFavoritesDrawer() {
+            const drawer = document.getElementById('favDrawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        // AUTHENTICATION MODAL & SIMULATION
+        function openAuthModal(mode = 'login') {
+            currentAuthMode = mode;
+            switchAuthTab(mode);
+            document.getElementById('authModal').classList.remove('hidden');
+        }
+
+        function switchAuthTab(mode) {
+            currentAuthMode = mode;
+            const tabLogin = document.getElementById('authTabLogin');
+            const tabSignup = document.getElementById('authTabSignup');
+            const nameField = document.getElementById('nameField');
+            const authBtn = document.getElementById('authBtn');
+
+            if (mode === 'login') {
+                tabLogin.className = "w-1/2 py-2 font-bold text-sm text-emerald-600 border-b-2 border-emerald-600 transition";
+                tabSignup.className = "w-1/2 py-2 font-bold text-sm text-slate-400 border-b-2 border-transparent hover:text-slate-600 transition";
+                nameField.classList.add('hidden');
+                authBtn.innerText = "Log In";
+            } else {
+                tabSignup.className = "w-1/2 py-2 font-bold text-sm text-emerald-600 border-b-2 border-emerald-600 transition";
+                tabLogin.className = "w-1/2 py-2 font-bold text-sm text-slate-400 border-b-2 border-transparent hover:text-slate-600 transition";
+                nameField.classList.remove('hidden');
+                authBtn.innerText = "Create Account";
+            }
+        }
+
+        function loginWithGoogle() {
+            // Simulated Google OAuth Flow
+            const mockUser = {
+                name: "Alex Sterling",
+                email: "alex.sterling@gmail.com",
+                avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150"
+            };
+            setUserSession(mockUser);
+            closeModal('authModal');
+            showToast("Successfully authenticated with Google!");
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value;
+            const name = document.getElementById('authName').value || email.split('@')[0];
+            const user = {
+                name: name,
+                email: email,
+                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150"
+            };
+            setUserSession(user);
+            closeModal('authModal');
+            showToast(currentAuthMode === 'login' ? "Welcome back!" : "Account created successfully!");
+        }
+
+        function setUserSession(user) {
+            currentUser = user;
+            localStorage.setItem('estatehub_user', JSON.stringify(user));
+            updateAuthUI();
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('estatehub_user');
+            updateAuthUI();
+            showToast("Signed out.");
+        }
+
+        function updateAuthUI() {
+            const unauthNav = document.getElementById('unauthNav');
+            const authNav = document.getElementById('authNav');
+            const unauthMobile = document.getElementById('unauthMobileNav');
+            const authMobile = document.getElementById('authMobileNav');
+
+            if (currentUser) {
+                unauthNav.classList.add('hidden');
+                authNav.classList.remove('hidden');
+                unauthMobile.classList.add('hidden');
+                authMobile.classList.remove('hidden');
+
+                document.getElementById('userNameNav').innerText = currentUser.name;
+                document.getElementById('userEmailNav').innerText = currentUser.email;
+                document.getElementById('userAvatarNav').src = currentUser.avatar;
+            } else {
+                unauthNav.classList.remove('hidden');
+                authNav.classList.add('hidden');
+                unauthMobile.classList.remove('hidden');
+                authMobile.classList.add('hidden');
+            }
+        }
+
+        // POST PROPERTY SYSTEM
+        function openPostModal() {
+            if (!currentUser) {
+                openAuthModal('login');
+                showToast("Please log in to post a property listing.");
+                return;
+            }
+            document.getElementById('postModal').classList.remove('hidden');
+        }
+
+        function handlePostProperty(e) {
+            e.preventDefault();
+            const newProp = {
+                id: Date.now(),
+                title: document.getElementById('postTitle').value,
+                purpose: document.getElementById('postPurpose').value,
+                type: document.getElementById('postType').value,
+                price: parseFloat(document.getElementById('postPrice').value),
+                location: document.getElementById('postLocation').value,
+                beds: parseInt(document.getElementById('postBeds').value),
+                baths: parseInt(document.getElementById('postBaths').value),
+                area: parseInt(document.getElementById('postArea').value),
+                img: document.getElementById('postImg').value || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1000",
+                desc: document.getElementById('postDesc').value || "Newly listed modern estate with premium finishes.",
+                featured: true,
+                agent: { name: currentUser.name, phone: "+1 800-555-ESTATE" }
+            };
+
+            properties.unshift(newProp);
+            localStorage.setItem('estatehub_props', JSON.stringify(properties));
+            applyFilters();
+            closeModal('postModal');
+            showToast("Your property listing has been published!");
+        }
+
+        // MORTGAGE CALCULATOR LOGIC
+        function calculateMortgage() {
+            const price = parseFloat(document.getElementById('calcPrice').value);
+            const downPercent = parseFloat(document.getElementById('calcDown').value);
+            const interest = parseFloat(document.getElementById('calcInterest').value);
+            const termYears = parseFloat(document.getElementById('calcTerm').value);
+
+            const downVal = price * (downPercent / 100);
+            const principal = price - downVal;
+
+            document.getElementById('calcPriceVal').innerText = `$${price.toLocaleString()}`;
+            document.getElementById('calcDownVal').innerText = `$${downVal.toLocaleString()}`;
+
+            const monthlyInterest = (interest / 100) / 12;
+            const totalPayments = termYears * 12;
+
+            let monthlyPayment = 0;
+            if (monthlyInterest > 0) {
+                monthlyPayment = (principal * monthlyInterest * Math.pow(1 + monthlyInterest, totalPayments)) / (Math.pow(1 + monthlyInterest, totalPayments) - 1);
+            } else {
+                monthlyPayment = principal / totalPayments;
+            }
+
+            document.getElementById('calcResult').innerHTML = `$${Math.round(monthlyPayment).toLocaleString()} <span class="text-xs font-normal text-slate-400">/ mo</span>`;
+        }
+
+        // INQUIRY SIMULATION
+        function sendInquiry(e) {
+            e.preventDefault();
+            showToast("Inquiry message sent to agent! They will contact you shortly.");
+            closeModal('propertyModal');
+        }
+
+        // UI HELPERS
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
